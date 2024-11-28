@@ -5,7 +5,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>360 Video Player</title>
-        <link rel="stylesheet" href="video_360_style.css" />
+        <link rel="stylesheet" href="video_360_style.css?v=2" />
         <link rel="shortcut icon" href="./gallery-view/landing_images/1.jpg" type="image/x-icon">
     </head>
 
@@ -14,7 +14,7 @@
             <div class="video-player">
                 <video playsinline="true" type="video/mp4"
                     webkit-playsinline="true" preload="auto" muted="muted"
-                    id="video360" src="./2160256939.mp4" controls="false"></video>
+                    id="video360" src="./2160256939.mp4?v=2" controls="false"></video>
                 <span class="video-time-line">00:00</span>
                 <div class="side-icons">
                     <div class="icon-parent iconslide1">
@@ -138,7 +138,15 @@
                 </div>
             </div>
         </div>
-        <script src="./video_360.js"></script>
+        <script src="./video_360.js?v=2"></script>
+        <script>
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered!', reg))
+                .catch(err => console.error('Service Worker registration failed:', err));
+            }
+          </script>
+          
     </body>
 
 </html>
