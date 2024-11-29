@@ -38,21 +38,30 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event: Cache video files and handle dynamic requests
 self.addEventListener('fetch', (event) => {
-  // If it's a video or other dynamic resource, use a different strategy
   if (event.request.url.includes('.mp4')) {
+    // Handle video file requests
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        // If video is found in cache, return it, otherwise fetch from network
-        return cachedResponse || fetch(event.request).then((response) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, response.clone()); // Save response to cache
-            return response;
-          });
+        if (cachedResponse) {
+          return cachedResponse; // Serve from cache if available
+        }
+        return fetch(event.request).then((response) => {
+          // Check if response is valid and complete
+          if (
+            response.status === 200 &&
+            response.type === 'basic' // Ensure it's a valid response
+          ) {
+            return caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, response.clone()); // Cache the complete response
+              return response;
+            });
+          }
+          return response; // Return the response without caching if invalid
         });
       })
     );
   } else {
-    // For other resources, fallback to default cache strategy (Cache First)
+    // Handle other resources with Cache First strategy
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request);
