@@ -56,7 +56,7 @@
     if (!isMouseDown) return;
     //deltaX property  returns a positive value when scrolling to the right, and a negative value when scrolling to the left
     const deltaX = e.clientX - startX;
-   // Adjust the video time based on mouse movement 1 pixel = 150ms change
+    // Adjust the video time based on mouse movement 1 pixel = 150ms change
     const newTime = startTime + deltaX / 150;
 
     if (newTime < 0) {
@@ -193,5 +193,4 @@
       });
     }
   );
-
 })();

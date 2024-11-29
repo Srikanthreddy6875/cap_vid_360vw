@@ -3,7 +3,7 @@ const urlsToCache = [
   './index.html',
   './video_360_style.css',
   './video_360.js',
-  './2160256939.mp4', // Replace with the correct file path for your video
+  './2160256939.mp4', 
 ];
 
 // Install event: Cache static assets
