@@ -3,7 +3,7 @@ const urlsToCache = [
   './index.html',
   './video_360_style.css',
   './video_360.js',
-  './2160256939.mp4', // Ensure the file path is correct
+  './2160256939.mp4', 
 ];
 
 // Install event: Cache static assets
@@ -21,6 +21,7 @@ self.addEventListener('install', (event) => {
 // Activate event: Clean up old caches
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
+
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -35,54 +36,26 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event: Handle requests for video and other resources
+// Fetch event: Cache video files and handle dynamic requests
 self.addEventListener('fetch', (event) => {
-  console.log('[Service Worker] Fetching:', event.request.url);
-
+  // If it's a video or other dynamic resource, use a different strategy
   if (event.request.url.includes('.mp4')) {
-    // For video files, handle dynamically while avoiding partial response caching
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          console.log('Returning cached video:', event.request.url);
-          return cachedResponse;
-        }
-
-        console.log('Fetching video from network:', event.request.url);
-        return fetch(event.request).then((networkResponse) => {
-          // Only cache complete responses (status 200 and no Content-Range)
-          if (
-            networkResponse.ok &&
-            networkResponse.status === 200 &&
-            !networkResponse.headers.get('content-range') // Ensure it's not a partial response
-          ) {
-            return caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-              console.log('Video cached successfully:', event.request.url);
-              return networkResponse;
-            });
-          }
-
-          // If partial or invalid response, return network response without caching
-          console.warn('Partial response, not caching:', event.request.url);
-          return networkResponse;
+        // If video is found in cache, return it, otherwise fetch from network
+        return cachedResponse || fetch(event.request).then((response) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, response.clone()); // Save response to cache
+            return response;
+          });
         });
       })
     );
   } else {
-    // Default caching strategy for non-video resources
+    // For other resources, fallback to default cache strategy (Cache First)
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request).then((networkResponse) => {
-          if (networkResponse.ok) {
-            return caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-              console.log('Cached resource:', event.request.url);
-              return networkResponse;
-            });
-          }
-          return networkResponse;
-        });
+        return response || fetch(event.request);
       })
     );
   }
